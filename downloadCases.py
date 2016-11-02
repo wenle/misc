@@ -62,6 +62,10 @@ def downloadCaseTxt(gid):
     print "download txt file from %s" % url
     f = urllib2.urlopen(url)
     fileName = f.info().getheader("Content-Disposition").split("=")[1].decode("gb2312")
+    if(u"：" in fileName):
+        fileName = fileName.split(u"：")[1] # 防止过长的中文名
+    if(u"（" in fileName):
+        fileName = fileName.split(u"（")[0] # 防止过长的中文名
     fullName = os.path.join(path, fileName)
     print "file name: %s"%fullName
     with open(fullName, "w") as txt:
