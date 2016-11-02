@@ -55,24 +55,38 @@ def extractGids(fileName):
     return gids
 
 def downloadCaseTxt(gid):
+    path = "/var/tmp/cases-txt"
+    if(not os.path.exists(path)):
+        os.makedirs(path)
     url = "http://beijinglawyers.chinalawinfo.com/case/download_n.asp?db=fnl&gid=%s&istxt=1"%gid
     print "download txt file from %s" % url
     f = urllib2.urlopen(url)
     fileName = f.info().getheader("Content-Disposition").split("=")[1].decode("gb2312")
-    fullName = os.path.join("/var/tmp/cases-txt", fileName)
+    fullName = os.path.join(path, fileName)
     print "file name: %s"%fullName
     with open(fullName, "w") as txt:
         txt.write(f.read())
     time.sleep(1)
+    return url
 
 # download html file of list page
-#download(1,99)
+download(1,99)
 
 gids = []
 for i in range(1,100):
     gids.extend(extractGids("/var/tmp/cases/%s.html"%i))
+failures = {}
+url = ""
 for gid in gids:
-    downloadCaseTxt(gid)
+    try:
+        url = downloadCaseTxt(gid)
+    except Exception, e:
+	print str(e)
+        failures[gid] = url
+if failures:
+    print "failure records:"
+    for gid in failures:
+        print gid, failures[gid]
 
 #import httplib
 #conn = httplib.HTTPConnection("http://beijinglawyers.chinalawinfo.com")
